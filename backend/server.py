@@ -330,7 +330,7 @@ async def register(user: UserCreate, current_user: dict = Depends(check_role(["o
     
     await db.users.insert_one(user_dict)
     del user_dict["password"]
-    del user_dict["_id"] if "_id" in user_dict else None
+    user_dict.pop("_id", None)
     user_dict["created_at"] = datetime.fromisoformat(user_dict["created_at"])
     return user_dict
 
