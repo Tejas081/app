@@ -13,12 +13,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     if (!email || !password) {
+      setError("Please fill in all fields");
       toast.error("Please fill in all fields");
       return;
     }
@@ -30,7 +33,9 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.response?.data?.detail || "Invalid credentials");
+      const errorMessage = error.response?.data?.detail || "Invalid email or password";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
