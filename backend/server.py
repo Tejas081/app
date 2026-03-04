@@ -290,6 +290,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
+async def get_users_lookup(user_ids: List[str]) -> dict:
+    """Batch fetch users and return a lookup dictionary"""
+    if not user_ids:
+        return {}
+    unique_ids = list(set(user_ids))
+    users = await db.users.find({"id": {"$in": unique_ids}}, {"_id": 0, "id": 1, "name": 1}).to_list(1000)
+    return {u["id"]: u["name"] for u in users}
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
