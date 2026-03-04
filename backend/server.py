@@ -442,14 +442,19 @@ async def get_tasks(current_user: dict = Depends(get_current_user)):
     else:
         tasks = await db.tasks.find({"assigned_to": current_user["id"]}, {"_id": 0}).to_list(1000)
     
+    # Batch fetch all users
+    user_ids = []
+    for t in tasks:
+        user_ids.append(t.get("assigned_to"))
+        user_ids.append(t.get("assigned_by"))
+    users_lookup = await get_users_lookup([uid for uid in user_ids if uid])
+    
     for t in tasks:
         t["created_at"] = datetime.fromisoformat(t["created_at"]) if isinstance(t["created_at"], str) else t["created_at"]
         if t.get("updated_at"):
             t["updated_at"] = datetime.fromisoformat(t["updated_at"]) if isinstance(t["updated_at"], str) else t["updated_at"]
-        assignee = await db.users.find_one({"id": t["assigned_to"]}, {"_id": 0})
-        assigner = await db.users.find_one({"id": t["assigned_by"]}, {"_id": 0})
-        t["assigned_to_name"] = assignee["name"] if assignee else None
-        t["assigned_by_name"] = assigner["name"] if assigner else None
+        t["assigned_to_name"] = users_lookup.get(t.get("assigned_to"))
+        t["assigned_by_name"] = users_lookup.get(t.get("assigned_by"))
     
     return tasks
 
