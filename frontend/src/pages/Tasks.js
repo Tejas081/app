@@ -235,12 +235,12 @@ const Tasks = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="project">Project</Label>
-                  <Select value={formData.project_id} onValueChange={(value) => setFormData({ ...formData, project_id: value })}>
+                  <Select value={formData.project_id || "none"} onValueChange={(value) => setFormData({ ...formData, project_id: value === "none" ? "" : value })}>
                     <SelectTrigger data-testid="task-project-select">
                       <SelectValue placeholder="Select project (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {projects.map(project => (
                         <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
                       ))}
